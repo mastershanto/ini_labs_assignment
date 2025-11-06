@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ini_labs_assignment/Features/user_details/presentations/screens/home_screen.dart';
 import 'package:ini_labs_assignment/Features/user_details/presentations/screens/user_input_screen.dart';
 // import '../../ui_utility/app_colors.dart';
 

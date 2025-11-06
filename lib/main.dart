@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:ini_labs_assignment/Features/user_details/presentations/screens/home_screen.dart';
+import 'package:get/get.dart';
 import 'package:ini_labs_assignment/Features/user_details/presentations/screens/user_input_screen.dart';
+import 'package:ini_labs_assignment/controllers.dart';
 import 'package:ini_labs_assignment/core/theme/app_theme.dart';
 
 void main() {
@@ -16,9 +17,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(375, 812),
-      builder: (context, child) => MaterialApp(
+      builder: (context, child) => GetMaterialApp(
         title: 'iNi Labs Assignment',
         theme: AppTheme.lightTheme,
+        initialBinding: ControllerBinder(),
         home: const UserInputScreen(),
       ),
     );

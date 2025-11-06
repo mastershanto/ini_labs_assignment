@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:ini_labs_assignment/Features/user_details/presentations/screens/home_screen.dart';
-import 'package:ini_labs_assignment/Features/user_details/presentations/widgets/custom_appbar.dart';
-import 'package:ini_labs_assignment/Features/user_details/presentations/widgets/custom_text_field.dart';
+import 'package:ini_labs_assignment/Features/user_details/presentations/state_holders/theme_controller.dart';
+import 'package:ini_labs_assignment/Features/user_details/presentations/state_holders/user_controller.dart';
+import 'package:ini_labs_assignment/Features/user_details/presentations/widgets/custom_button.dart';
+import '../widgets/custom_text_field.dart';
 
 class UserInputScreen extends StatefulWidget {
   const UserInputScreen({super.key});
@@ -15,6 +17,8 @@ class UserInputScreen extends StatefulWidget {
 class _UserInputScreenState extends State<UserInputScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final UserController userController = Get.find<UserController>();
+  final ThemeController themeController = Get.find<ThemeController>();
 
   @override
   void dispose() {
@@ -22,10 +26,41 @@ class _UserInputScreenState extends State<UserInputScreen> {
     super.dispose();
   }
 
+  void _handleSearch() async {
+    if (_formKey.currentState!.validate()) {
+      await userController.fetchUser(_usernameController.text.trim());
+
+      if (userController.user != null) {
+        Get.to(() => const HomeScreen());
+      } else if (userController.errorMessage.isNotEmpty) {
+        Get.snackbar(
+          'Error',
+          userController.errorMessage,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: EdgeInsets.all(16.w),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: "GitHub User Search"),
+      appBar: AppBar(
+        title: const Text('GitHub Search'),
+        actions: [
+          GetBuilder<ThemeController>(
+            builder: (controller) => IconButton(
+              icon: Icon(
+                controller.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              ),
+              onPressed: controller.toggleTheme,
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -37,13 +72,13 @@ class _UserInputScreenState extends State<UserInputScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Icon(
-                    Icons.person_search,
+                    Icons.code,
                     size: 100.sp,
                     color: Theme.of(context).primaryColor,
                   ),
                   SizedBox(height: 32.h),
                   Text(
-                    'GitHub Profile Search',
+                    'Welcome to GitHub Search',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.displaySmall,
                   ),
@@ -58,13 +93,9 @@ class _UserInputScreenState extends State<UserInputScreen> {
                     controller: _usernameController,
                     hintText: 'Enter GitHub username',
                     labelText: 'Username',
-                    prefixIcon: Icons.code,
-                    suffixIcon: Icons.search,
-                    onSuffixIconTap: () {
-                      Get.to(() => HomeScreen());
-                    },
+                    prefixIcon: Icons.person,
                     keyboardType: TextInputType.text,
-                    onSubmitted: (value) {},
+                    onSubmitted: (_) => _handleSearch(),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter a username';
@@ -76,6 +107,14 @@ class _UserInputScreenState extends State<UserInputScreen> {
                     },
                   ),
                   SizedBox(height: 24.h),
+                  GetBuilder<UserController>(
+                    builder: (controller) => CustomButton(
+                      text: 'Search',
+                      onPressed: _handleSearch,
+                      isLoading: controller.isLoading,
+                      icon: Icons.search,
+                    ),
+                  ),
                   SizedBox(height: 24.h),
                   Container(
                     padding: EdgeInsets.all(16.w),
