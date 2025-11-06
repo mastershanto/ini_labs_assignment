@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import '../../data/models/repository.dart';
-import '../../domain/usecases/get_user_repositories_usecase.dart';
+import 'package:ini_labs_assignment/Features/user_details/data/model/repository.dart';
+import 'package:ini_labs_assignment/Features/user_details/domain/usecases/get_user_repository_usecase.dart';
 
 enum ViewType { list, grid }
 
@@ -74,7 +74,7 @@ class RepositoryController extends GetxController {
 
     switch (sortType) {
       case SortType.name:
-        filtered.sort((a, b) => a?.name.compareTo(b.name));
+        filtered.sort((a, b) => a.name.compareTo(b.name));
         break;
       case SortType.date:
         filtered.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
