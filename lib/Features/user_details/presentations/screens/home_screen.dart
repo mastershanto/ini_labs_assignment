@@ -1,29 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ini_labs_assignment/Features/user_details/presentations/screens/repository_list_screen.dart';
+import 'package:ini_labs_assignment/Features/user_details/presentations/state_holders/repository_controller.dart';
+import 'package:ini_labs_assignment/Features/user_details/presentations/state_holders/theme_controller.dart';
+import 'package:ini_labs_assignment/Features/user_details/presentations/state_holders/user_controller.dart';
+import '../widgets/loading_widget.dart';
+import '../widgets/error_widget.dart' as custom;
 
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  final Map<String, dynamic> dummyUser = const {
-    'login': 'john_doe',
-    'name': 'John Doe',
-    'avatarUrl': 'https://via.placeholder.com/100', // Placeholder image URL
-    'bio': 'A passionate developer who loves coding and open source.',
-    'company': 'Tech Corp',
-    'location': 'San Francisco, CA',
-    'blog': 'https://johndoe.dev',
-    'publicRepos': 42,
-    'followers': 123,
-    'following': 456,
-  };
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-  final List<String> dummyRepositories = const [
-    'flutter-app',
-    'dart-library',
-    'web-project',
-  ];
+class _HomeScreenState extends State<HomeScreen> {
+  final UserController userController = Get.find<UserController>();
+  final RepositoryController repoController = Get.find<RepositoryController>();
+  final ThemeController themeController = Get.find<ThemeController>();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRepositories();
+  }
+
+  void _fetchRepositories() {
+    if (userController.user != null) {
+      repoController.fetchRepositories(userController.user!.login);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,30 +39,66 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Profile & Repositories'),
         actions: [
-          IconButton(
-            icon: Icon(
-              Theme.of(context).brightness == Brightness.dark ? Icons.light_mode : Icons.dark_mode,
+          GetBuilder<ThemeController>(
+            builder: (controller) => IconButton(
+              icon: Icon(
+                controller.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              ),
+              onPressed: controller.toggleTheme,
             ),
-            onPressed: () {
-            },
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await Future.delayed(const Duration(seconds: 1));
+      body: GetBuilder<UserController>(
+        builder: (controller) {
+          final user = controller.user;
+          if (user == null) {
+            return const Center(child: Text('No user data'));
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async => _fetchRepositories(),
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(child: _buildUserProfile(user)),
+                SliverToBoxAdapter(child: _buildRepositoryHeader()),
+                GetBuilder<RepositoryController>(
+                  builder: (controller) {
+                    if (controller.isLoading) {
+                      return const SliverFillRemaining(
+                        child: LoadingWidget(
+                          message: 'Loading repositories...',
+                        ),
+                      );
+                    }
+
+                    if (controller.errorMessage.isNotEmpty) {
+                      return SliverFillRemaining(
+                        child: custom.ErrorWidget(
+                          message: controller.errorMessage,
+                          onRetry: _fetchRepositories,
+                        ),
+                      );
+                    }
+
+                    if (controller.repositories.isEmpty) {
+                      return const SliverFillRemaining(
+                        child: Center(child: Text('No repositories found')),
+                      );
+                    }
+
+                    return const SliverToBoxAdapter(child: SizedBox.shrink());
+                  },
+                ),
+              ],
+            ),
+          );
         },
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(child: _buildUserProfile(context, dummyUser)),
-            SliverToBoxAdapter(child: _buildRepositoryHeader(dummyRepositories)),
-          ],
-        ),
       ),
     );
   }
 
-  Widget _buildUserProfile(BuildContext context, Map<String, dynamic> user) {
+  Widget _buildUserProfile(user) {
     return Container(
       margin: EdgeInsets.all(16.w),
       padding: EdgeInsets.all(20.w),
@@ -63,7 +107,7 @@ class HomeScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -71,48 +115,46 @@ class HomeScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Avatar
           CircleAvatar(
             radius: 50.r,
-            backgroundImage: CachedNetworkImageProvider(user['avatarUrl']),
+            backgroundImage: CachedNetworkImageProvider(user.avatarUrl),
           ),
           SizedBox(height: 16.h),
-          // Name and username
           Text(
-            user['name'] ?? user['login'],
+            user.name ?? user.login,
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           SizedBox(height: 4.h),
-          Text('@${user['login']}', style: Theme.of(context).textTheme.bodyMedium),
-          // Bio if available
-          if (user['bio'] != null) ...[
+          Text('@${user.login}', style: Theme.of(context).textTheme.bodyMedium),
+          if (user.bio != null) ...[
             SizedBox(height: 12.h),
             Text(
-              user['bio'],
+              user.bio!,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
           ],
           SizedBox(height: 16.h),
-          // Chips for company, location, blog
           Wrap(
             spacing: 16.w,
             runSpacing: 8.h,
             alignment: WrapAlignment.center,
             children: [
-              if (user['company'] != null) _buildInfoChip(context, Icons.business, user['company']),
-              if (user['location'] != null) _buildInfoChip(context, Icons.location_on, user['location']),
-              if (user['blog'] != null && user['blog'].isNotEmpty) _buildInfoChip(context, Icons.link, user['blog']),
+              if (user.company != null)
+                _buildInfoChip(Icons.business, user.company!),
+              if (user.location != null)
+                _buildInfoChip(Icons.location_on, user.location!),
+              if (user.blog != null && user.blog!.isNotEmpty)
+                _buildInfoChip(Icons.link, user.blog!),
             ],
           ),
           SizedBox(height: 16.h),
-          // Stats: Repos, Followers, Following
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildStatColumn(context, 'Repos', user['publicRepos'].toString()),
-              _buildStatColumn(context, 'Followers', user['followers'].toString()),
-              _buildStatColumn(context, 'Following', user['following'].toString()),
+              _buildStatColumn('Repos', user.publicRepos.toString()),
+              _buildStatColumn('Followers', user.followers.toString()),
+              _buildStatColumn('Following', user.following.toString()),
             ],
           ),
         ],
@@ -120,12 +162,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Helper to build info chips (e.g., for company, location)
-  Widget _buildInfoChip(BuildContext context, IconData icon, String text) {
+  Widget _buildInfoChip(IconData icon, String text) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Row(
@@ -148,8 +189,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Helper to build stat columns (e.g., number of repos)
-  Widget _buildStatColumn(BuildContext context, String label, String value) {
+  Widget _buildStatColumn(String label, String value) {
     return Column(
       children: [
         Text(value, style: Theme.of(context).textTheme.headlineMedium),
@@ -159,29 +199,29 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Builds the header/button to view repositories
-  Widget _buildRepositoryHeader(List<String> repositories) {
-    if (repositories.isEmpty) {
-      return const SizedBox.shrink();
-    }
+  Widget _buildRepositoryHeader() {
+    return GetBuilder<RepositoryController>(
+      builder: (controller) {
+        if (controller.repositories.isEmpty) {
+          return const SizedBox.shrink();
+        }
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      child: ElevatedButton.icon(
-        onPressed: () {
-          // Navigation to repository list page. In original, used Get.to()
-          // Here, placeholder: Navigator.push(context, MaterialPageRoute(builder: (_) => RepositoryListPage()));
-        },
-        icon: const Icon(Icons.folder),
-        label: Text(
-          'View ${repositories.length} Repositories',
-          style: TextStyle(fontSize: 16.sp),
-        ),
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          minimumSize: Size(double.infinity, 50.h),
-        ),
-      ),
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          child: ElevatedButton.icon(
+            onPressed: () => Get.to(() => const RepositoryListScreen()),
+            icon: const Icon(Icons.folder),
+            label: Text(
+              'View ${controller.repositories.length} Repositories',
+              style: TextStyle(fontSize: 16.sp),
+            ),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 16.h),
+              minimumSize: Size(double.infinity, 50.h),
+            ),
+          ),
+        );
+      },
     );
   }
 }
