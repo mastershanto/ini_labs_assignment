@@ -74,7 +74,7 @@ class RepositoryController extends GetxController {
 
     switch (sortType) {
       case SortType.name:
-        filtered.sort((a, b) => a.name.compareTo(b.name));
+        filtered.sort((a, b) => a?.name.compareTo(b.name));
         break;
       case SortType.date:
         filtered.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));

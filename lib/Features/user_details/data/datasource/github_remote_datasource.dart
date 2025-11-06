@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import '../../core/network/dio_client.dart';
-import '../../core/network/exceptions.dart';
+import 'package:ini_labs_assignment/core/network/dio_client.dart';
+import 'package:ini_labs_assignment/core/network/exception.dart';
 
 abstract class GithubRemoteDataSource {
   Future<Map<String, dynamic>> getUser(String username);
