@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:ini_labs_assignment/Features/user_details/data/model/repository.dart';
 import 'package:ini_labs_assignment/core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class RepositoryDetailPage extends StatelessWidget {
- 
+class RepositoryDetailScreen extends StatelessWidget {
+  final Repository repository;
 
-  const RepositoryDetailPage({super.key, required this.repository});
+  const RepositoryDetailScreen({super.key, required this.repository});
 
   Future<void> _launchUrl(String url) async {
     final uri = Uri.parse(url);
