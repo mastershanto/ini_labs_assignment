@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:ini_labs_assignment/Features/user_details/presentations/screens/home_screen.dart';
 import 'package:ini_labs_assignment/Features/user_details/presentations/widgets/custom_appbar.dart';
 import 'package:ini_labs_assignment/Features/user_details/presentations/widgets/custom_text_field.dart';
 
@@ -58,6 +59,10 @@ class _UserInputScreenState extends State<UserInputScreen> {
                     hintText: 'Enter GitHub username',
                     labelText: 'Username',
                     prefixIcon: Icons.code,
+                    suffixIcon: Icons.search,
+                    onSuffixIconTap: () {
+                      Get.to(() => HomeScreen());
+                    },
                     keyboardType: TextInputType.text,
                     onSubmitted: (value) {},
                     validator: (value) {
