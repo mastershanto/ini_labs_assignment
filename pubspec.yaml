@@ -2,6 +2,10 @@ name: ini_labs_assignment
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
 
 dependencies:
   flutter:
@@ -9,19 +13,94 @@ dependencies:
 
 
   cupertino_icons: ^1.0.8
-  flutter_screenutil: ^5.9.0
-
+  flutter_screenutil: ^5.9.3
+  auto_animated: ^3.2.0
+  get_storage: ^2.1.1
+  intl: ^0.20.2
+  url_launcher: ^6.3.1
+  dotlottie_loader: ^0.0.5
+  lottie: ^3.3.1
+  dio: ^5.8.0+1
+  get_it: ^8.0.3
+  cached_network_image: ^3.4.1
+  shimmer: ^3.0.0
+  image_picker: ^1.1.2
+  
+  blurrycontainer: ^2.1.0
+  smooth_page_indicator: ^1.2.1
+  gap: ^3.0.1
+  grouped_list: ^6.0.0
+  file_picker: ^10.2.0
+  emoji_picker_flutter: ^4.3.0
+  carousel_slider: ^5.1.1
+  flutter_riverpod: ^2.6.1
+  shared_preferences: ^2.5.3
+  dartz: ^0.10.1
+  get: ^4.7.2
+  rxdart: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  
   flutter_lints: ^5.0.0
+  build_runner:
+  flutter_gen_runner:
 
+flutter_gen:
+  output: lib/core/gen/
+  line_length: 80
 
+    # Optional
+  integrations:
+    flutter_svg: false
+    rive: false
+    lottie: false
+
+  colors:
+    inputs:
+      - assets/color/colors.xml
+
+    outputs:
+      class_name: AppColors
+  
 flutter:
 
- 
   uses-material-design: true
 
- 
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/icons/
+    - assets/lottie/
+    - assets/images/
+  
+  fonts:
+  - family: DMSans
+    fonts:
+      - asset: assets/fonts/DMSans-Regular.ttf
+
+  - family: Flamante
+    fonts:
+      - asset: assets/fonts/Flamante-Regular.ttf
+
+  - family: Inter
+    fonts:
+      - asset: assets/fonts/Inter-Regular.ttf
+
+  - family: Lufga
+    fonts:
+      - asset: assets/fonts/Lufga-Regular.ttf
+
+  - family: Matt_Trial
+    fonts:
+      - asset: assets/fonts/Matt_Trial-Regular.ttf
+
+  - family: NunitoSans
+    fonts:
+      - asset: assets/fonts/NunitoSans-Regular.ttf
+
+  - family: Poppins
+    fonts:
+      - asset: assets/fonts/Poppins-Regular.ttf
+
+  - family: Roboto
+    fonts:
+      - asset: assets/fonts/Roboto-Regular.ttf
