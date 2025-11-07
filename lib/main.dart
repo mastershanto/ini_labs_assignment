@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
-              themeMode: themeController!.isDarkMode
+              themeMode: themeController.isDarkMode
                   ? ThemeMode.dark
                   : ThemeMode.light,
               home: const UserInputScreen(),
